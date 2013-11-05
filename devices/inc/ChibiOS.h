@@ -43,7 +43,7 @@
 #define GLCD_RESET_LOW()  // not implemented
 #define GLCD_RESET_HIGH() // not implemented
 
-#define GLCD_A0_LOW()     palSetPad(GLCD_A0_PORT, GLCD_A0_PAD);
+#define GLCD_A0_LOW()     palClearPad(GLCD_A0_PORT, GLCD_A0_PAD);
 #define GLCD_A0_HIGH()    palSetPad(GLCD_A0_PORT, GLCD_A0_PAD);
 
 #endif /* CHIBIOS_H_ */
