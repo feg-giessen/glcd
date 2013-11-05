@@ -67,6 +67,12 @@
 	#include "devices/inc/STM32F0xx.h"
 	extern void delay_ms(uint32_t ms);
 	#define PROGMEM
+
+#elif defined(GLCD_DEVICE_CHIBIOS)
+	#include "devices/inc/ChibiOS.h"
+	extern void delay_ms(uint32_t ms);
+	#define PROGMEM
+
 	
 #else
 	#error "Device not supported"

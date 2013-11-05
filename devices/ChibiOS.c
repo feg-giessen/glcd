@@ -1,12 +1,11 @@
 /**
-   \file glcd_devices.h
-   \brief Functions specific to certain devices (microcontrollers).
-          These are functions are defined in devices/yourdevice.c
-   \author Andy Gock
- */ 
+ * \file ChibiOs.c
+ * \brief Device implementation for ChibiOs
+ * \author Peter Schuster
+ */
 
 /*
-	Copyright (c) 2012, Andy Gock
+	Copyright (c) 2013, Peter Schuster
 
 	All rights reserved.
 
@@ -32,55 +31,26 @@
 	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef GLCD_DEVICES_H_
-#define GLCD_DEVICES_H_
-
-#if defined(GLCD_DEVICE_AVR8)
-	#include <avr/io.h>
-#elif defined(GLCD_DEVICE_LPC111X)
-	#include "LPC11xx.h"
-#elif defined(GLCD_DEVICE_LPC11UXX)
-	#include "LPC11Uxx.h"
-#elif defined(GLCD_DEVICE_STM32F0XX)
-	#include "STM32F0xx.h"
-#elif defined(GLCD_DEVICE_CHIBIOS)
-	#include "ChibiOS.h"
-#else
-	#error "Device not supported"
-#endif
-
-/** \addtogroup Devices Devices
- *  Functions specific to certain devices (microcontrollers)
- *  \{
- */
-
-/**
- * Initialise the LCD. This function is platform and controller specific.
- */
-void glcd_init(void);
-
 #if !defined(GLCD_USE_PARALLEL)
 
-	/**
-	 * Write a byte to the connected SPI slave.
-	 * \param c Byte to be written
-	 * \return Returned value from SPI (often not used)
-	 */
-	void glcd_spi_write(uint8_t c);
+#include "inc/ChibiOS.h"
+
+void glcd_init(void) {
+}
+
+void glcd_spi_write(uint8_t c) {
+	GLCD_SELECT();
+	spiSend(GLCD_SPI_DRIVER, 1, &c);
+	GLCD_DESELECT();
+}
+
+void glcd_reset(void) {
+}
+
+void delay_ms(uint32_t ms) {
+	chThdSleepMilliseconds(ms);
+}
 
 #else
-	/* must be GLCD_USE_SPI */
-	void glcd_parallel_write(uint8_t c);
-
-#endif
-
-/**
- *  Reset the LCD.
- *  \note Not all LCD controllers support reset.
- */
-void glcd_reset(void);
-
-/** @}*/
-
-#endif /* GLCD_DEVICES_H_ */
+	#error "Parallel mode is not supported for ChibiOS"
+#endif /* !defined(GLCD_USE_PARALLEL) */

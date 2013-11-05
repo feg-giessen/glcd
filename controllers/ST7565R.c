@@ -21,17 +21,17 @@ void glcd_data(uint8_t c)
 }
 
 void glcd_set_contrast(uint8_t val) {
-	asm("break");
+	// not implemented
 }
 
 void glcd_power_down(void)
 {
-	asm("break");
+	// not implemented
 }
 
 void glcd_power_up(void)
 {
-	asm("break");
+	// not implemented
 }
 
 void glcd_set_y_address(uint8_t y)

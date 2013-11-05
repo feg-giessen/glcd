@@ -1,12 +1,11 @@
 /**
-   \file glcd_devices.h
-   \brief Functions specific to certain devices (microcontrollers).
-          These are functions are defined in devices/yourdevice.c
-   \author Andy Gock
- */ 
+ * \file ChibiOs.h
+ * \brief Device implementation for ChibiOs
+ * \author Peter Schuster
+ */
 
 /*
-	Copyright (c) 2012, Andy Gock
+	Copyright (c) 2013, Peter Schuster
 
 	All rights reserved.
 
@@ -32,55 +31,19 @@
 	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#ifndef CHIBIOS_H_
+#define CHIBIOS_H_
 
-#ifndef GLCD_DEVICES_H_
-#define GLCD_DEVICES_H_
+#include "ch.h"
+#include "hal.h"
+#include "ChibiOS_Config.h"
 
-#if defined(GLCD_DEVICE_AVR8)
-	#include <avr/io.h>
-#elif defined(GLCD_DEVICE_LPC111X)
-	#include "LPC11xx.h"
-#elif defined(GLCD_DEVICE_LPC11UXX)
-	#include "LPC11Uxx.h"
-#elif defined(GLCD_DEVICE_STM32F0XX)
-	#include "STM32F0xx.h"
-#elif defined(GLCD_DEVICE_CHIBIOS)
-	#include "ChibiOS.h"
-#else
-	#error "Device not supported"
-#endif
+#define GLCD_SELECT()     spiSelect(GLCD_SPI_DRIVER);
+#define GLCD_DESELECT()   spiUnselect(GLCD_SPI_DRIVER);
+#define GLCD_RESET_LOW()  // not implemented
+#define GLCD_RESET_HIGH() // not implemented
 
-/** \addtogroup Devices Devices
- *  Functions specific to certain devices (microcontrollers)
- *  \{
- */
+#define GLCD_A0_LOW()     palSetPad(GLCD_A0_PORT, GLCD_A0_PAD);
+#define GLCD_A0_HIGH()    palSetPad(GLCD_A0_PORT, GLCD_A0_PAD);
 
-/**
- * Initialise the LCD. This function is platform and controller specific.
- */
-void glcd_init(void);
-
-#if !defined(GLCD_USE_PARALLEL)
-
-	/**
-	 * Write a byte to the connected SPI slave.
-	 * \param c Byte to be written
-	 * \return Returned value from SPI (often not used)
-	 */
-	void glcd_spi_write(uint8_t c);
-
-#else
-	/* must be GLCD_USE_SPI */
-	void glcd_parallel_write(uint8_t c);
-
-#endif
-
-/**
- *  Reset the LCD.
- *  \note Not all LCD controllers support reset.
- */
-void glcd_reset(void);
-
-/** @}*/
-
-#endif /* GLCD_DEVICES_H_ */
+#endif /* CHIBIOS_H_ */
