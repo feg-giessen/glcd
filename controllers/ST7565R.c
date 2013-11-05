@@ -25,6 +25,9 @@ void glcd_data(uint8_t c)
 #if defined(GLCD_MULTI_WRITES)
 void glcd_data_mult(const uint8_t* c, int length)
 {
+	if (length <= 0)
+		return;
+
 	GLCD_A0_HIGH();
 	glcd_spi_write_mult(c, length);
 }
@@ -53,7 +56,7 @@ void glcd_set_y_address(uint8_t y)
 void glcd_set_x_address(uint8_t x)
 {
 	glcd_set_column_upper(x);
-	glcd_set_column_lower(x);	
+	glcd_set_column_lower(x);
 }
 
 void glcd_all_on(void)
