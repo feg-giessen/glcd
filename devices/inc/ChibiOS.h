@@ -38,6 +38,8 @@
 #include "hal.h"
 #include "ChibiOS_Config.h"
 
+#define GLCD_MULTI_WRITES TRUE
+
 #define GLCD_SELECT()     spiSelect(GLCD_SPI_DRIVER);
 #define GLCD_DESELECT()   spiUnselect(GLCD_SPI_DRIVER);
 #define GLCD_RESET_LOW()  // not implemented

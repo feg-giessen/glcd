@@ -69,6 +69,10 @@ void glcd_init(void);
 	 */
 	void glcd_spi_write(uint8_t c);
 
+#if defined(GLCD_MULTI_WRITES)
+	void glcd_spi_write_mult(const uint8_t* c, int length);
+#endif
+
 #else
 	/* must be GLCD_USE_SPI */
 	void glcd_parallel_write(uint8_t c);

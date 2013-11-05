@@ -4,6 +4,8 @@
  * \author Andy Gock
  * \see glcd.h
  */ 
+#include <string.h>
+
 #if defined(GLCD_CONTROLLER_ST7565R)
 
 #include "../glcd.h"
@@ -20,7 +22,16 @@ void glcd_data(uint8_t c)
 	glcd_spi_write(c);	
 }
 
-void glcd_set_contrast(uint8_t val) {
+#if defined(GLCD_MULTI_WRITES)
+void glcd_data_mult(const uint8_t* c, int length)
+{
+	GLCD_A0_HIGH();
+	glcd_spi_write_mult(c, length);
+}
+#endif
+
+void glcd_set_contrast(uint8_t val)
+{
 	// not implemented
 }
 
@@ -73,12 +84,21 @@ void glcd_set_start_line(uint8_t addr)
 /** Clear the display immediately, does not buffer */
 void glcd_clear_now(void)
 {
+#if defined(GLCD_MULTI_WRITES)
+	uint8_t data[GLCD_NUMBER_OF_COLS];
+	memset(data, GLCD_NUMBER_OF_COLS, 0);
+#endif
 	for (uint8_t page = 0; page < GLCD_NUMBER_OF_BANKS; page++) {
 		glcd_set_y_address(page);
 		glcd_set_x_address(0);
+
+#if defined(GLCD_MULTI_WRITES)
+		glcd_data_mult(data, GLCD_NUMBER_OF_COLS);
+#else
 		for (uint8_t col = 0; col < GLCD_NUMBER_OF_COLS; col++) {
 			glcd_data(0);
-		}			
+		}
+#endif
 	}
 }
 
@@ -99,8 +119,6 @@ void glcd_write()
 	uint8_t bank;
 
 	for (bank = 0; bank < GLCD_NUMBER_OF_BANKS; bank++) {
-		/* Each bank is a single row 8 bits tall */
-		uint8_t column;		
 		
 		if (glcd_bbox_selected->y_min >= (bank+1)*8) {
 			continue; /* Skip the entire bank */
@@ -113,10 +131,18 @@ void glcd_write()
 		glcd_set_y_address(bank);
 		glcd_set_x_address(glcd_bbox_selected->x_min);
 
+#if defined(GLCD_MULTI_WRITES)
+		glcd_data_mult(
+            &glcd_buffer_selected[GLCD_NUMBER_OF_COLS * bank + glcd_bbox_selected->x_min],
+            glcd_bbox_selected->x_max - glcd_bbox_selected->x_min + 1);
+#else
+		/* Each bank is a single row 8 bits tall */
+		uint8_t column;
 		for (column = glcd_bbox_selected->x_min; column <= glcd_bbox_selected->x_max; column++)
 		{
 			glcd_data( glcd_buffer_selected[GLCD_NUMBER_OF_COLS * bank + column] );
 		}
+#endif
 	}
 
 	glcd_reset_bbox();

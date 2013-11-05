@@ -61,6 +61,10 @@ void glcd_command(uint8_t c);
  *  \param c Data byte to be written to LCD
  */
 void glcd_data(uint8_t c);
+
+#if defined(GLCD_MULTI_WRITES)
+void glcd_data_mult(const uint8_t* c, int length);
+#endif
 	
 /**
  * Set contrast.

@@ -44,6 +44,12 @@ void glcd_spi_write(uint8_t c) {
 	GLCD_DESELECT();
 }
 
+void glcd_spi_write_mult(const uint8_t* c, int length) {
+	GLCD_SELECT();
+	spiSend(GLCD_SPI_DRIVER, length, c);
+	GLCD_DESELECT();
+}
+
 void glcd_reset(void) {
 }
 
