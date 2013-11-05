@@ -5,10 +5,10 @@
  * \see glcd.h
  */ 
 #include <string.h>
+#include "../glcd.h"
 
 #if defined(GLCD_CONTROLLER_ST7565R)
 
-#include "../glcd.h"
 
 void glcd_command(uint8_t c)
 {
