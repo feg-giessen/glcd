@@ -51,10 +51,10 @@ void glcd_set_pixel(uint8_t x, uint8_t y, uint8_t color) {
 
 	if (color) {
 		/* Set black */
-		glcd_buffer[x+ (y/8)*GLCD_LCD_WIDTH] |= ( 1 << (y%8));
+		glcd_buffer_selected[x+ (y/8)*GLCD_LCD_WIDTH] |= ( 1 << (y%8));
 	} else {
 		/* Set white */
-		glcd_buffer[x+ (y/8)*GLCD_LCD_WIDTH] &= ~ (1 << (y%8));
+		glcd_buffer_selected[x+ (y/8)*GLCD_LCD_WIDTH] &= ~ (1 << (y%8));
 	}
 
 	glcd_update_bbox(x,y,x,y);
@@ -66,7 +66,7 @@ uint8_t glcd_get_pixel(uint8_t x, uint8_t y) {
 		return 0;
 	}
 	
-	if ( glcd_buffer[x+ (y/8)*GLCD_LCD_WIDTH] & ( 1 << (y%8)) ) {
+	if ( glcd_buffer_selected[x+ (y/8)*GLCD_LCD_WIDTH] & ( 1 << (y%8)) ) {
 		return 1;
 	} else {
 		return 0;
@@ -78,7 +78,7 @@ void glcd_invert_pixel(uint8_t x, uint8_t y) {
 		return;
 	}
 	glcd_update_bbox(x,y,x,y);
-	glcd_buffer[x+ (y/8)*GLCD_LCD_WIDTH] ^= ( 1 << (y%8));
+	glcd_buffer_selected[x+ (y/8)*GLCD_LCD_WIDTH] ^= ( 1 << (y%8));
 }
 
 /* Bresenham's algorithm - based on PCD8544 library Limor Fried */
