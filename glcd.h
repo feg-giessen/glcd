@@ -75,10 +75,27 @@
 	extern void delay_ms(uint32_t ms);
 	#define PROGMEM
 
-	
+#elif defined(GLCD_DEVICE_STM32F4XX)
+	#include <stm32f4xx.h>
+	#include "devices/STM32F4.h"
+	extern void delay_ms(uint32_t ms);
+	#define PROGMEM
+
+#elif defined(GLCD_DEVICE_PIC24H)
+	#define FCY (FOSC/2)
+	#include <stdint.h>
+	#include <xc.h>
+	#include <libpic30.h>
+	#include "devices/PIC24H.h"
+	#define PROGMEM
+	#define delay_ms(t) __delay_ms(t)
+#elif defined(GLCD_DEVICE_PIC32)
+        #include "devices/PIC32.h"
+        #define PROGMEM
+        extern void delay_ms(unsigned int ms);
 #else
-	#error "Device not supported"
-	
+	#error "Device not supported or defined"
+
 #endif
 
 #if defined(GLCD_CONTROLLER_PCD8544)
@@ -91,11 +108,34 @@
 	#include "controllers/NT75451.h"
 		
 #else
-	#error "Controller not supported"
+	#error "Controller not supported or defined"
 	
 #endif
 
+/* Macros */
+
 #define swap(a, b) { uint8_t t = a; a = b; b = t; }
+
+/* Defining new types */
+
+/**
+ * Font table type
+ */
+typedef enum {
+	STANG,
+	MIKRO,
+	GLCD_UTILS
+} font_table_type_t;
+
+/**
+ * Bounding box for pixels that need to be updated
+ */
+typedef struct {
+	uint8_t x_min;
+	uint8_t y_min;
+	uint8_t x_max;
+	uint8_t y_max;
+} glcd_BoundingBox_t;
 
 #include <stdint.h>
 #include "glcd_devices.h"
@@ -119,36 +159,45 @@
  * @{
  */
 
-/* Set to custom value, or leave at 0 for automatic assignment. */ 
-
-/**
- * User specified GLCD width in pixels
- * Set to 0 for automatic assignment based on controller
- */
-#define GLCD_LCD_WIDTH  0
-
-/**
- * User specified GLCD height in pixels
- * Set to 0 for automatic assignment based on controller
+/* 
+ * Set to custom value, or leave at 0 for automatic assignment.
+ * For custom dimensions, users can define this in their compiler options.
  */
 
-#define GLCD_LCD_HEIGHT 0
+#if !defined(GLCD_LCD_WIDTH) || !defined(GLCD_LCD_HEIGHT)
 
-/* Automatic assignment of width and height, if required. */
-#if !GLCD_LCD_WIDTH && !GLCD_LCD_HEIGHT
-	#undef GLCD_LCD_WIDTH
-	#undef GLCD_LCD_HEIGHT
-	#if defined(GLCD_CONTROLLER_PCD8544)
-		#define GLCD_LCD_WIDTH 84
-		#define GLCD_LCD_HEIGHT 48
-	#elif defined(GLCD_CONTROLLER_ST7565R) || defined(GLCD_CONTROLLER_NT75451)
-		#define GLCD_LCD_WIDTH 128
-		#define GLCD_LCD_HEIGHT 64
-	#else
-		#define GLCD_LCD_WIDTH 128
-		#define GLCD_LCD_HEIGHT 64
+	/**
+	 * User specified GLCD width in pixels
+	 * Set to 0 for automatic assignment based on controller.
+	 */
+	#define GLCD_LCD_WIDTH  0
+
+	/**
+	 * User specified GLCD height in pixels
+	 * Set to 0 for automatic assignment based on controller.
+	 */
+
+	#define GLCD_LCD_HEIGHT 0
+
+	/* Automatic assignment of width and height, if required. */
+	#if !GLCD_LCD_WIDTH && !GLCD_LCD_HEIGHT
+		#undef GLCD_LCD_WIDTH
+		#undef GLCD_LCD_HEIGHT
+		#if defined(GLCD_CONTROLLER_PCD8544)
+			/* 84x48 is standard for the popular Nokia LCD */
+			#define GLCD_LCD_WIDTH 84
+			#define GLCD_LCD_HEIGHT 48
+		#elif defined(GLCD_CONTROLLER_ST7565R) || defined(GLCD_CONTROLLER_NT75451)
+			/* 128x64 is the most popular for this, so we'll use that as default */
+			#define GLCD_LCD_WIDTH 128
+			#define GLCD_LCD_HEIGHT 64
+		#else
+			#define GLCD_LCD_WIDTH 128
+			#define GLCD_LCD_HEIGHT 64
+		#endif
 	#endif
-#endif
+
+#endif /* !defined(GLCD_LCD_WIDTH) || !defined(GLCD_LCD_HEIGHT) */
 
 /*
  * GLCD_NUMBER_OF_BANKS is typically GLCD_LCD_HEIGHT/8
@@ -160,19 +209,9 @@
 /**@}*/
 
 #if !defined(GLCD_RESET_TIME)
-/** Reset duration by glcd_reset(), in milliseconds */
-#define GLCD_RESET_TIME 1
+	/** Reset duration by glcd_reset(), in milliseconds */
+	#define GLCD_RESET_TIME 1
 #endif
-
-/**
- * Bounding box for pixels that need to be updated
- */
-typedef struct {
-	uint8_t x_min;
-	uint8_t y_min;
-	uint8_t x_max;
-	uint8_t y_max;
-} glcd_BoundingBox_t;
 
 /* Global variables used for GLCD library */
 extern uint8_t glcd_buffer[GLCD_LCD_WIDTH * GLCD_LCD_HEIGHT / 8];
@@ -256,15 +295,13 @@ void glcd_scroll_line(void);
 
 /** @}*/
 
-enum font_table_type { STANG, MIKRO };
-
 typedef struct {
 	const char *font_table;
 	uint8_t width;
 	uint8_t height;
 	char start_char;
 	char end_char;
-	enum font_table_type table_type;
+	font_table_type_t table_type;
 } glcd_FontConfig_t;
 
 extern uint8_t *glcd_buffer_selected;

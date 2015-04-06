@@ -46,8 +46,16 @@
 	#include "STM32F0xx.h"
 #elif defined(GLCD_DEVICE_CHIBIOS)
 	#include "ChibiOS.h"
+#elif defined(GLCD_DEVICE_STM32F4XX)
+	#include "stm32f4xx.h"
+	#include "devices/STM32F4.h"
+#elif defined(GLCD_DEVICE_PIC24H)
+	#include <stdint.h>
+	#include <xc.h>
+	#include <libpic30.h>
+#elif defined(GLCD_DEVICE_PIC32)
 #else
-	#error "Device not supported"
+	#error "Device not supported or defined"
 #endif
 
 /** \addtogroup Devices Devices

@@ -84,7 +84,6 @@ void glcd_write()
 {
 	uint8_t bank;
 
-
 	for (bank = 0; bank < PCD8544_MAX_BANKS; bank++) {
 		/* Each bank is a single row 8 bits tall */
 		uint8_t column;
@@ -108,6 +107,26 @@ void glcd_write()
 
 	glcd_reset_bbox();
 
+}
+
+void glcd_PCD8544_init(void) {
+
+	glcd_reset();
+	
+	/* Get into the EXTENDED mode! */
+	glcd_command(PCD8544_FUNCTION_SET | PCD8544_EXTENDED_INSTRUCTION);
+
+	/* LCD bias select (4 is optimal?) */
+	glcd_command(PCD8544_SET_BIAS | 0x2);
+
+	/* Set VOP (affects contrast) */
+	glcd_command(PCD8544_SET_VOP | 80); /* Experimentally determined, play with this figure until contrast looks nice */
+
+	/* Back to standard instructions */
+	glcd_command(PCD8544_FUNCTION_SET);
+
+	/* Normal mode */
+	glcd_command(PCD8544_DISPLAY_CONTROL | PCD8544_DISPLAY_NORMAL);
 }
 
 #endif
